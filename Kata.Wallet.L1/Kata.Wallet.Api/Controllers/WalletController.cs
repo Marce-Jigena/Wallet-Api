@@ -1,4 +1,5 @@
-﻿using Kata.Wallet.Dtos;
+﻿using Kata.Wallet.Domain;
+using Kata.Wallet.Dtos;
 using Kata.Wallet.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,9 +17,9 @@ public class WalletController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Domain.Wallet>>> GetAll()
+    public async Task<ActionResult<List<Domain.Wallet>>> GetAll(Currency? currency, string? userDocument)
     {
-        var wallets = await _walletService.GetAllAsync();
+        var wallets = await _walletService.GetAllAsync(currency, userDocument);
         return Ok(wallets);
     }
 

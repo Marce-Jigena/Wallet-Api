@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Kata.Wallet.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kata.Wallet.Database;
 
@@ -11,9 +12,22 @@ public class WalletRepository : IWalletRepository
         _context = context;
     }
 
-    public async Task<List<Domain.Wallet>> GetAllAsync()
+    public async Task<List<Domain.Wallet>> GetAllAsync(Currency? currency, string? userDocument)
     {
-        return await _context.Wallets.ToListAsync();
+        switch ((currency.HasValue, userDocument != null))
+        {
+            case (true, true):
+                return await _context.Wallets.Where(w => w.Currency == currency && w.UserDocument == userDocument).ToListAsync();
+
+            case (true, false):
+                return await _context.Wallets.Where(w => w.Currency == currency).ToListAsync();
+            
+            case (false, true):
+                return await _context.Wallets.Where(w => w.UserDocument == userDocument).ToListAsync();
+
+            default:
+                return await _context.Wallets.ToListAsync();
+        }
     }
 
     public async Task<Domain.Wallet> GetByIdAsync(int id)

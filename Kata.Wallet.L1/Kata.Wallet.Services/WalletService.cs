@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Kata.Wallet.Database;
+using Kata.Wallet.Domain;
 using Kata.Wallet.Dtos;
 
 namespace Kata.Wallet.Services;
@@ -17,9 +18,9 @@ public class WalletService : IWalletService
         _walletRepository = walletRepository;
     }
 
-    public async Task<List<Domain.Wallet>> GetAllAsync()
+    public async Task<List<Domain.Wallet>> GetAllAsync(Currency? currency, string? userDocument)
     {
-        return await _walletRepository.GetAllAsync();
+        return await _walletRepository.GetAllAsync(currency, userDocument);
     }
 
     public async Task CreateAsync(WalletDto walletDto)
