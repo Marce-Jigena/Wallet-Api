@@ -30,6 +30,54 @@ public class WalletRepository : IWalletRepository
         }
     }
 
+    public async Task NewTransfer(int originWalletId, int destinationWalletId, decimal amount, string description)
+    {
+        var originWallet = _context.Wallets.FirstOrDefault(ow => ow.Id == originWalletId);
+
+        var destinationWallet = _context.Wallets.FirstOrDefault(dw => dw.Id == destinationWalletId);
+
+        if (!(originWallet == null || destinationWallet == null)) 
+        {
+            if (!(originWallet.Balance < amount))
+            {
+                originWallet.Balance -= amount;
+                if (originWallet.OutgoingTransactions == null) 
+                {
+                    originWallet.OutgoingTransactions = new List<Transaction>();
+               
+                }
+
+                originWallet.OutgoingTransactions.Add(new Transaction
+                {
+                    Amount = amount,
+                    Date = DateTime.UtcNow,
+                    Description = description,
+                    WalletOutgoing = destinationWallet
+                });
+
+                destinationWallet.Balance += amount;
+                if (destinationWallet.IncomingTransactions == null)
+                {
+                    destinationWallet.IncomingTransactions = new List<Transaction>();
+
+                }
+
+                destinationWallet.IncomingTransactions.Add(new Transaction
+                {
+                    Amount = amount,
+                    Date = DateTime.UtcNow,
+                    Description = description,
+                    WalletIncoming = originWallet
+                });
+
+                _context.Wallets.Update(originWallet);
+                _context.Wallets.Update(originWallet);
+            }
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<Domain.Wallet> GetByIdAsync(int id)
     {
         return await _context.Wallets.FindAsync(id);

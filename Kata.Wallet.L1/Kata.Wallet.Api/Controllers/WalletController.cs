@@ -23,6 +23,19 @@ public class WalletController : ControllerBase
         return Ok(wallets);
     }
 
+    [HttpPut]
+    public async Task<ActionResult> NewTransfer(int originWalletId, int destinationWalletId, decimal amount, string description) 
+    {
+        if (originWalletId == null || destinationWalletId == null) 
+        {
+            return BadRequest("Debes seleccionar 2 billeteras para hacer una transferencia");
+        }
+
+        await _walletService.NewTransfer(originWalletId, destinationWalletId, amount, description);
+
+        return Ok();
+    }
+
     [HttpPost]
     public async Task<ActionResult> Create([FromBody] WalletDto wallet)
     {

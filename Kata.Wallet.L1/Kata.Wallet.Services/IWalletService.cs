@@ -7,4 +7,5 @@ public interface IWalletService
 {
     Task<List<Domain.Wallet>> GetAllAsync(Currency? currency, string? userDocument);
     Task CreateAsync(WalletDto walletDto);
+    Task NewTransfer(int originWalletId, int destinationWalletId, decimal amount, string description);
 }

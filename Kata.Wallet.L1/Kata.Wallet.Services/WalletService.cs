@@ -23,6 +23,11 @@ public class WalletService : IWalletService
         return await _walletRepository.GetAllAsync(currency, userDocument);
     }
 
+    public async Task NewTransfer(int originWalletId, int destinationWalletId, decimal amount, string description) 
+    {
+        await _walletRepository.NewTransfer(originWalletId, destinationWalletId, amount, description);
+    }
+
     public async Task CreateAsync(WalletDto walletDto)
     {
         var wallet = _mapper.Map<Domain.Wallet>(walletDto);
