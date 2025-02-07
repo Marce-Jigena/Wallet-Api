@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Kata.Wallet.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/[controller]/[action]")]
 public class WalletController : ControllerBase
 {
     private readonly IWalletService _walletService;
@@ -23,12 +23,25 @@ public class WalletController : ControllerBase
         return Ok(wallets);
     }
 
+    [HttpGet]
+    public async Task<ActionResult<List<Transaction>>> GetTransactionsAsync(int walletId)
+    {
+        var transactions = await _walletService.GetTransactionsAsync(walletId);
+
+        if (transactions == null)
+        {
+            return BadRequest();
+        }
+
+        return Ok(transactions);
+    }
+
     [HttpPut]
     public async Task<ActionResult> NewTransfer(int originWalletId, int destinationWalletId, decimal amount, string description) 
     {
-        if (originWalletId == null || destinationWalletId == null) 
+        if (originWalletId == 0 || destinationWalletId == 0) 
         {
-            return BadRequest("Debes seleccionar 2 billeteras para hacer una transferencia");
+            return BadRequest("Debes seleccionar 2 billeteras validas para hacer una transferencia");
         }
 
         await _walletService.NewTransfer(originWalletId, destinationWalletId, amount, description);
