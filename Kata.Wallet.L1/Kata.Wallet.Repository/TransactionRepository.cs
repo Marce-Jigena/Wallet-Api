@@ -12,9 +12,13 @@ public class TransactionRepository : ITransactionRepository
         _context = context;
     }
 
-    public async Task<List<Transaction>> GetAllAsync()
+    public async Task<List<Transaction>> GetAllAsync(int walletId)
     {
-        return await _context.Transactions.ToListAsync();
+        var wallet = await _context.Wallets.Where(w => w.Id == walletId).Include(t => t.IncomingTransactions).Include(t => t.OutgoingTransactions).FirstAsync();
+        var transactions = GetTransactions(wallet);
+
+        return transactions;
+
     }
 
     public async Task<Transaction> GetByIdAsync(int id)
@@ -42,5 +46,27 @@ public class TransactionRepository : ITransactionRepository
             _context.Transactions.Remove(transaction);
             await _context.SaveChangesAsync();
         }
+    }
+
+    public List<Transaction> GetTransactions(Domain.Wallet wallet)
+    {
+        List<Transaction> transactions = new List<Transaction>();
+        if (!(wallet.IncomingTransactions == null))
+        {
+            foreach (var transaction in wallet.IncomingTransactions)
+            {
+                transactions.Add(transaction);
+            }
+        }
+
+        if (!(wallet.OutgoingTransactions == null))
+        {
+            foreach (var transaction in wallet.OutgoingTransactions)
+            {
+                transactions.Add(transaction);
+            }
+        }
+
+        return (transactions);
     }
 }

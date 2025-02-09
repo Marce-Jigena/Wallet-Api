@@ -30,25 +30,6 @@ public class WalletRepository : IWalletRepository
         }
     }
 
-    public async Task<List<Transaction>> GetTransactionsAsync(Domain.Wallet wallet) 
-    {
-        var transactions = new List<Transaction>();
-        
-        if (!(wallet.IncomingTransactions == null))
-        {
-            GetTransactions(wallet.IncomingTransactions);
-
-        }
-   
-        if (!(wallet.OutgoingTransactions == null))
-        {
-            GetTransactions(wallet.OutgoingTransactions);
-        }
-
-        return transactions;
-
-    }
-
     public async Task NewTransfer(Domain.Wallet originWallet, Domain.Wallet destinationWallet, decimal amount, string description)
     {
 
@@ -57,7 +38,7 @@ public class WalletRepository : IWalletRepository
             if (originWallet.Balance >= amount)
             {
                 originWallet.Balance -= amount;
-                if (originWallet.OutgoingTransactions == null) 
+                if (originWallet.OutgoingTransactions == null)
                 {
                     originWallet.OutgoingTransactions = new List<Transaction>();
                 }
@@ -86,12 +67,13 @@ public class WalletRepository : IWalletRepository
                     Amount = amount,
                     Date = DateTime.UtcNow,
                     Description = description,
-                    WalletOutgoing = originWallet
+                    WalletIncoming= originWallet
                 };
                 _context.Transactions.Add(incomingTransaction);
 
-               destinationWallet.IncomingTransactions.Add(incomingTransaction);
+                destinationWallet.IncomingTransactions.Add(incomingTransaction);
             }
+            else throw new NotEnoughFundsException(409, "Wallet", "No hay suficientes fondos para realizar la transaccion");
         }
     }
 
@@ -120,15 +102,5 @@ public class WalletRepository : IWalletRepository
             _context.Wallets.Remove(wallet);
             await _context.SaveChangesAsync();
         }
-    }
-
-    public List<Transaction> GetTransactions(List<Transaction> transactions)
-    {
-        foreach (var transaction in transactions)
-        {
-            transactions.Add(transaction);
-        }
-
-        return (transactions);
     }
 }

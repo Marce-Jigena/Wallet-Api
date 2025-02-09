@@ -26,13 +26,6 @@ public class WalletService : IWalletService
         return walletDto;
     }
 
-    public async Task<List<Transaction>> GetTransactionsAsync(int walletId)
-    {
-        var wallet = await _walletRepository.GetByIdAsync(walletId);
-        return await _walletRepository.GetTransactionsAsync(wallet);
-    }
-
-    //modificar para que devuelva wallet
     public async Task NewTransfer(int originWalletId, int destinationWalletId, decimal amount, string description) 
     {
         var originWallet = await _walletRepository.GetByIdAsync(originWalletId);
@@ -42,7 +35,7 @@ public class WalletService : IWalletService
         {
             if (originWallet.Currency != destinationWallet.Currency)
             {
-                throw new Exception("Invalid Currency");
+                throw new DifferentCurrencyException(409, "Wallet", "La moneda de ambas cuentas debe ser la misma.");
             }
             else
             {
@@ -54,7 +47,7 @@ public class WalletService : IWalletService
         }
         else
         {
-            //Generar Bad Request
+            throw new KeyNotFoundException("Una o mas wallets no fueron encontradas.");
         }
     }
 

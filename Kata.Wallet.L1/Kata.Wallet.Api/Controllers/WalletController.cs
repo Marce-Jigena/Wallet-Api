@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Kata.Wallet.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]/[action]")]
+[Route("api/[controller]")]
 public class WalletController : ControllerBase
 {
     private readonly IWalletService _walletService;
@@ -23,19 +23,6 @@ public class WalletController : ControllerBase
         return Ok(wallets);
     }
 
-    [HttpGet]
-    public async Task<ActionResult<List<Transaction>>> GetTransactionsAsync(int walletId)
-    {
-        var transactions = await _walletService.GetTransactionsAsync(walletId);
-
-        if (transactions == null)
-        {
-            return BadRequest();
-        }
-
-        return Ok(transactions);
-    }
-
     [HttpPut]
     public async Task<ActionResult> NewTransfer(int originWalletId, int destinationWalletId, decimal amount, string description) 
     {
@@ -43,10 +30,25 @@ public class WalletController : ControllerBase
         {
             return BadRequest("Debes seleccionar 2 billeteras validas para hacer una transferencia");
         }
+        try
+        {
+            await _walletService.NewTransfer(originWalletId, destinationWalletId, amount, description);
+            return Ok();
+        }
 
-        await _walletService.NewTransfer(originWalletId, destinationWalletId, amount, description);
+        catch (DifferentCurrencyException ex)
+        {
+            return BadRequest(new { ex.Message, ex.ErrorCode, ex.Entity });
+        }
+        catch (NotEnoughFundsException ex)
+        {
+            return BadRequest(new { ex.Message, ex.ErrorCode, ex.Entity });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return BadRequest(new { ex.Message });
+        }
 
-        return Ok();
     }
 
     [HttpPost]
