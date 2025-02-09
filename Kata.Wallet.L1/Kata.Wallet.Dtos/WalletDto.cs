@@ -9,4 +9,7 @@ public class WalletDto
     public string? UserDocument { get; set; }
     public string? UserName { get; set; }
     public Currency Currency { get; set; }
+
+    public List<TransactionDto>? IncomingTransactions { get; set; }
+    public List<TransactionDto>? OutgoingTransactions { get; set; }
 }

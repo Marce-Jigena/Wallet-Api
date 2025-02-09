@@ -19,9 +19,11 @@ public class WalletService : IWalletService
         _walletRepository = walletRepository;
     }
 
-    public async Task<List<Domain.Wallet>> GetAllAsync(Currency? currency, string? userDocument)
+    public async Task<List<WalletDto>> GetAllAsync(Currency? currency, string? userDocument)
     {
-        return await _walletRepository.GetAllAsync(currency, userDocument);
+        var wallet = await _walletRepository.GetAllAsync(currency, userDocument);
+        var walletDto =  _mapper.Map<List<WalletDto>>(wallet);
+        return walletDto;
     }
 
     public async Task<List<Transaction>> GetTransactionsAsync(int walletId)
@@ -46,6 +48,8 @@ public class WalletService : IWalletService
             {
                 //Se crea transferencia y transaccion.
                 await _walletRepository.NewTransfer(originWallet, destinationWallet, amount, description);
+                await _walletRepository.UpdateAsync(originWallet);
+                await _walletRepository.UpdateAsync(destinationWallet);
             }
         }
         else

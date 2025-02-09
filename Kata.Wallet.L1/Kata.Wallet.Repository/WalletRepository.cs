@@ -17,16 +17,16 @@ public class WalletRepository : IWalletRepository
         switch ((currency.HasValue, userDocument != null))
         {
             case (true, true):
-                return await _context.Wallets.Where(w => w.Currency == currency && w.UserDocument == userDocument).Include(t => t.IncomingTransactions).ToListAsync();
+                return await _context.Wallets.Where(w => w.Currency == currency && w.UserDocument == userDocument).Include(t => t.IncomingTransactions).Include(t => t.OutgoingTransactions).ToListAsync();
 
             case (true, false):
-                return await _context.Wallets.Where(w => w.Currency == currency).Include(t => t.IncomingTransactions).ToListAsync();
+                return await _context.Wallets.Where(w => w.Currency == currency).Include(t => t.IncomingTransactions).Include(t => t.OutgoingTransactions).ToListAsync();
             
             case (false, true):
-                return await _context.Wallets.Where(w => w.UserDocument == userDocument).Include(t => t.IncomingTransactions).ToListAsync();
+                return await _context.Wallets.Where(w => w.UserDocument == userDocument).Include(t => t.IncomingTransactions).Include(t => t.OutgoingTransactions).ToListAsync();
 
             default:
-                return await _context.Wallets.Include(t => t.IncomingTransactions).ToListAsync();
+                return await _context.Wallets.Include(t => t.IncomingTransactions).Include(t => t.OutgoingTransactions).ToListAsync();
         }
     }
 
@@ -51,17 +51,15 @@ public class WalletRepository : IWalletRepository
 
     public async Task NewTransfer(Domain.Wallet originWallet, Domain.Wallet destinationWallet, decimal amount, string description)
     {
-        var walletOne = await _context.Wallets.FindAsync(originWallet.Id);
-        var walletTwo = await _context.Wallets.FindAsync(destinationWallet.Id);
 
-        if (!(walletOne == null || walletTwo == null)) 
+        if (!(originWallet == null || destinationWallet == null)) 
         {
-            if (walletOne.Balance >= amount)
+            if (originWallet.Balance >= amount)
             {
-                walletOne.Balance -= amount;
-                if (walletOne.OutgoingTransactions == null) 
+                originWallet.Balance -= amount;
+                if (originWallet.OutgoingTransactions == null) 
                 {
-                    walletOne.OutgoingTransactions = new List<Transaction>();
+                    originWallet.OutgoingTransactions = new List<Transaction>();
                 }
 
                 var outgoingTransaction = new Transaction
@@ -69,17 +67,17 @@ public class WalletRepository : IWalletRepository
                     Amount = amount,
                     Date = DateTime.UtcNow,
                     Description = description,
-                    WalletOutgoing = walletTwo
+                    WalletOutgoing = destinationWallet
                 };
 
                 _context.Transactions.Add(outgoingTransaction);
 
-                walletOne.OutgoingTransactions.Add(outgoingTransaction);
+                originWallet.OutgoingTransactions.Add(outgoingTransaction);
 
-                walletTwo.Balance += amount;
-                if (walletTwo.IncomingTransactions == null)
+                destinationWallet.Balance += amount;
+                if (destinationWallet.IncomingTransactions == null)
                 {
-                    walletTwo.IncomingTransactions = new List<Transaction>();
+                    destinationWallet.IncomingTransactions = new List<Transaction>();
 
                 }
 
@@ -88,16 +86,11 @@ public class WalletRepository : IWalletRepository
                     Amount = amount,
                     Date = DateTime.UtcNow,
                     Description = description,
-                    WalletIncoming = walletOne
+                    WalletOutgoing = originWallet
                 };
                 _context.Transactions.Add(incomingTransaction);
 
-               walletTwo.IncomingTransactions.Add(incomingTransaction);
-
-
-                _context.Update(walletOne);
-                _context.Update(walletTwo);
-                await _context.SaveChangesAsync();
+               destinationWallet.IncomingTransactions.Add(incomingTransaction);
             }
         }
     }
@@ -115,11 +108,7 @@ public class WalletRepository : IWalletRepository
 
     public async Task UpdateAsync(Domain.Wallet wallet)
     {
-        var entity = await _context.Wallets.FindAsync(wallet.Id);
-        entity.IncomingTransactions = wallet.IncomingTransactions;
-        entity.OutgoingTransactions = wallet.OutgoingTransactions;
-        var entries = _context.ChangeTracker.Entries(); foreach (var entry in entries) { Console.WriteLine($"{entry.Entity.GetType().Name} - {entry.State}"); }
-        _context.Update(entity);
+        _context.Update(wallet);
         await _context.SaveChangesAsync();
     }
 

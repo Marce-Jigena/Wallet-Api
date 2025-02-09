@@ -15,7 +15,6 @@ builder.Services.AddControllers().AddJsonOptions(x =>
     // serialize enums as strings in api responses 
     x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-    x.JsonSerializerOptions.MaxDepth = 10;
 }); ;
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

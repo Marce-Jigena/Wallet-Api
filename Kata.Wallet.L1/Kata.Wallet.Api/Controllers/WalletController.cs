@@ -17,7 +17,7 @@ public class WalletController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Domain.Wallet>>> GetAll(Currency? currency, string? userDocument)
+    public async Task<ActionResult<List<WalletDto>>> GetAll(Currency? currency, string? userDocument)
     {
         var wallets = await _walletService.GetAllAsync(currency, userDocument);
         return Ok(wallets);
