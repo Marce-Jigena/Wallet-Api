@@ -38,12 +38,9 @@ public class WalletRepository : IWalletRepository
             if (originWallet.Balance >= amount)
             {
                 originWallet.Balance -= amount;
-                if (originWallet.OutgoingTransactions == null)
-                {
-                    originWallet.OutgoingTransactions = new List<Transaction>();
-                }
+                destinationWallet.Balance += amount;
 
-                var outgoingTransaction = new Transaction
+                var transaction = new Transaction
                 {
                     Amount = amount,
                     Date = DateTime.UtcNow,
@@ -52,28 +49,7 @@ public class WalletRepository : IWalletRepository
                     WalletIncoming = destinationWallet
                 };
 
-                _context.Transactions.Add(outgoingTransaction);
-
-                originWallet.OutgoingTransactions.Add(outgoingTransaction);
-
-                destinationWallet.Balance += amount;
-                if (destinationWallet.IncomingTransactions == null)
-                {
-                    destinationWallet.IncomingTransactions = new List<Transaction>();
-
-                }
-
-                var incomingTransaction = new Transaction
-                {
-                    Amount = amount,
-                    Date = DateTime.UtcNow,
-                    Description = description,
-                    WalletIncoming = destinationWallet,
-                    WalletOutgoing = originWallet
-                };
-                _context.Transactions.Add(incomingTransaction);
-
-                destinationWallet.IncomingTransactions.Add(incomingTransaction);
+                _context.Transactions.Add(transaction);
             }
             else throw new NotEnoughFundsException(409, "Wallet", "No hay suficientes fondos para realizar la transaccion");
         }
