@@ -31,6 +31,7 @@ public class WalletService : IWalletService
         var originWallet = await _walletRepository.GetByIdAsync(originWalletId);
         var destinationWallet = await _walletRepository.GetByIdAsync(destinationWalletId);
 
+        //Check de que exista la wallet
         if (Exists(originWallet) && Exists(destinationWallet))
         {
             if (originWallet.Currency != destinationWallet.Currency)

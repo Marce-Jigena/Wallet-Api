@@ -1,4 +1,5 @@
 ﻿using Kata.Wallet.Domain;
+using Kata.Wallet.Dtos;
 using Kata.Wallet.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +17,7 @@ namespace Kata.Wallet.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Transaction>>> GetTransactionsAsync(int walletId)
+        public async Task<ActionResult<List<TransactionDto>>> GetTransactionsAsync(int walletId)
         {
             var transactions = await _transactionService.GetTransactionsAsync(walletId);
 
