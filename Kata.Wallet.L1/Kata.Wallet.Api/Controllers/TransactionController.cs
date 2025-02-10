@@ -1,5 +1,4 @@
-﻿using Kata.Wallet.Domain;
-using Kata.Wallet.Dtos;
+﻿using Kata.Wallet.Dtos;
 using Kata.Wallet.Services;
 using Microsoft.AspNetCore.Mvc;
 

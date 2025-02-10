@@ -1,5 +1,4 @@
-﻿using System.Net;
-using AutoMapper;
+﻿using AutoMapper;
 using Kata.Wallet.Database;
 using Kata.Wallet.Domain;
 using Kata.Wallet.Dtos;

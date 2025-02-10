@@ -1,6 +1,5 @@
 ﻿using Moq;
 using Kata.Wallet.Services;
-using Kata.Wallet.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Kata.Wallet.Api.Controllers;
 using Kata.Wallet.Dtos;
@@ -63,6 +62,7 @@ namespace Kata.Wallet.Tests
             // Assert
             var badRequestResult = result.Result as BadRequestResult;
             Assert.IsNotNull(badRequestResult);
+            Assert.AreEqual(400, badRequestResult.StatusCode);
         }
     }
 }

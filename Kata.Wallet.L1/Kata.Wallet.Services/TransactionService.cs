@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Kata.Wallet.Database;
 using Kata.Wallet.Dtos;
 
@@ -25,6 +20,10 @@ namespace Kata.Wallet.Services
         public async Task<List<TransactionDto>> GetTransactionsAsync(int walletId)
         {
             var transaction = await _transactionRepository.GetAllAsync(walletId);
+            if (transaction == null)
+            {
+                throw new KeyNotFoundException("No se encontraron transacciones.");
+            }
             var transactionDto = _mapper.Map<List<TransactionDto>>(transaction);
 
             return transactionDto;
