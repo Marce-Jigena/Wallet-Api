@@ -48,7 +48,8 @@ public class WalletRepository : IWalletRepository
                     Amount = amount,
                     Date = DateTime.UtcNow,
                     Description = description,
-                    WalletOutgoing = destinationWallet
+                    WalletOutgoing = originWallet,
+                    WalletIncoming = destinationWallet
                 };
 
                 _context.Transactions.Add(outgoingTransaction);
@@ -67,7 +68,8 @@ public class WalletRepository : IWalletRepository
                     Amount = amount,
                     Date = DateTime.UtcNow,
                     Description = description,
-                    WalletIncoming= originWallet
+                    WalletIncoming = destinationWallet,
+                    WalletOutgoing = originWallet
                 };
                 _context.Transactions.Add(incomingTransaction);
 
