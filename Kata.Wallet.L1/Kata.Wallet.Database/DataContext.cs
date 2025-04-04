@@ -6,13 +6,8 @@ namespace Kata.Wallet.Database;
 
 public class DataContext : DbContext
 {
-    protected readonly IConfiguration Configuration;
-
-    public DataContext(IConfiguration configuration) => Configuration = configuration;
-
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    public DataContext(DbContextOptions<DataContext> options) : base(options)
     {
-        options.UseInMemoryDatabase("WalletDb");
     }
 
     public DbSet<Domain.Wallet> Wallets { get; set; }
@@ -22,14 +17,31 @@ public class DataContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Transaction>().HasKey(x => x.Id);
-        modelBuilder.Entity<Transaction>().Property(x => x.Amount).HasPrecision(16, 2).IsRequired();
-        modelBuilder.Entity<Transaction>().HasOne(x => x.WalletIncoming).WithMany(x => x.IncomingTransactions);
-        modelBuilder.Entity<Transaction>().HasOne(x => x.WalletOutgoing).WithMany(x => x.OutgoingTransactions);
-        modelBuilder.Entity<Domain.Wallet>().HasKey(x => x.Id);
-        modelBuilder.Entity<Domain.Wallet>().Property(x => x.Balance).HasPrecision(16, 2).IsRequired();
-        modelBuilder.Entity<Domain.Wallet>().Property(x => x.Currency).IsRequired();
-        modelBuilder.Entity<Domain.Wallet>().HasMany(x => x.IncomingTransactions).WithOne(x => x.WalletIncoming);
-        modelBuilder.Entity<Domain.Wallet>().HasMany(x => x.OutgoingTransactions).WithOne(x => x.WalletOutgoing);
+        // Configuración de Transaction
+        modelBuilder.Entity<Transaction>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Amount).HasPrecision(16, 2).IsRequired();
+            entity.HasOne(x => x.WalletIncoming)
+                .WithMany(x => x.IncomingTransactions)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(x => x.WalletOutgoing)
+                .WithMany(x => x.OutgoingTransactions)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Configuración de Wallet
+        modelBuilder.Entity<Domain.Wallet>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Balance).HasPrecision(16, 2).IsRequired();
+            entity.Property(x => x.Currency).IsRequired();
+            entity.HasMany(x => x.IncomingTransactions)
+                .WithOne(x => x.WalletIncoming)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasMany(x => x.OutgoingTransactions)
+                .WithOne(x => x.WalletOutgoing)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
     }
 }
